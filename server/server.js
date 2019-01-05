@@ -16,17 +16,17 @@ app.post('/todos', (req, res) => {
     });
 
     posttodo.save().then((doc) => {
-        res.status(200).send(doc);
+        return res.status(200).send(doc);
     }, (e) => {
-        res.status(400).send(e);
+        return res.status(400).send(e);
     });
 });
 
 app.get('/todos', (req, res) => {
     todo.find().then((todoslist) => {
-        res.send({ todoslist });
+        return res.send({ todoslist });
     }, (e) => {
-        res.status(400).send(e);
+        return res.status(400).send(e);
     });
 
 
@@ -35,20 +35,20 @@ app.get('/todos', (req, res) => {
 app.get('/todos/:id', (req, res) => {
     if (!ObjectID.isValid(req.params.id)) {
 
-        res.status(400).send({
+        return res.status(400).send({
             error: `todos ID ${req.params.id} not valid`
         });
 
     };
-    todo.findById(req.params.id).then((doc) => {
-        if (!doc) {
-            res.status(404).send({
+    todo.findById(req.params.id).then((todoid) => {
+        if (!todoid) {
+            return res.status(404).send({
                 error: `todos ID ${req.params.id} not found`
             });
         };
-        res.status(200).send(doc);
+        return res.status(200).send({ todoid });
     }, (e) => {
-        res.status(400).send(e);
+        return res.status(400).send(e);
     });
 
 
