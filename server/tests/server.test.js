@@ -11,7 +11,9 @@ const todos = [{
     text: 'First test todo'
 }, {
     _id: new ObjectID(),
-    text: 'Second test todo'
+    text: 'Second test todo',
+    completed: false,
+    completedAt: 3333
 }];
 
 beforeEach((done) => {
@@ -163,6 +165,56 @@ describe(' DELETE /todos/:id', () => {
 
         request(app)
             .delete(`/todos/1234`)
+            .expect(400)
+            .end(done);
+
+    });
+});
+
+describe(' PATCH /todos/:id', () => {
+    it('should PATCH todo id ', (done) => {
+        var text = 'new text';
+        request(app)
+            .patch(`/todos/${todos[1]._id.toHexString()}`)
+            .send({ completed: true, text })
+            .expect(200)
+            .expect((res) => {
+                expect(res.body.todoid.text).toBe(text);
+                expect(res.body.todoid.completed).toBe(true);
+                expect(typeof res.body.todoid.completedAt).toBe('number');
+            })
+            .end(done);
+
+    });
+
+    it('should PATCH todo id - clear completedAt when completed is false ', (done) => {
+        var text = 'new text';
+        request(app)
+            .patch(`/todos/${todos[1]._id.toHexString()}`)
+            .send({ completed: false, text })
+            .expect(200)
+            .expect((res) => {
+                expect(res.body.todoid.text).toBe(text);
+                expect(res.body.todoid.completed).toBe(false);
+                expect(res.body.todoid.completedAt).toBeFalsy();
+            })
+            .end(done);
+
+    });
+
+    it('should PATCH todo id 404  if not found', (done) => {
+
+        request(app)
+            .patch(`/todos/${new ObjectID().toHexString()}`)
+            .expect(404)
+            .end(done);
+
+    });
+
+    it('should PATCH todo id 400  if not valid', (done) => {
+
+        request(app)
+            .patch(`/todos/1234`)
             .expect(400)
             .end(done);
 
