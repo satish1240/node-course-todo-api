@@ -1,5 +1,6 @@
-var express = require('express');
-var bodyParser = require('body-parser');
+const _ = require('lodash');
+const express = require('express');
+const bodyParser = require('body-parser');
 
 const { ObjectID } = require('mongodb');
 var { mongoose } = require('./db/mongoose.js');
@@ -68,6 +69,37 @@ app.delete('/todos/:id', (req, res) => {
         if (!todoid) {
             return res.status(404).send({
                 error: `todos ID ${req.params.id} not found`
+            });
+        };
+        return res.status(200).send({ todoid });
+    }, (e) => {
+        return res.status(400).send(e);
+    });
+
+
+});
+
+app.patch('/todos/:id', (req, res) => {
+    var id = req.params.id;
+    var body = _.pick(req.body, ['text', 'completed']);
+    if (!ObjectID.isValid(id)) {
+
+        return res.status(400).send({
+            error: `todos ID ${id} not valid`
+        });
+
+    };
+
+    if (_.isBoolean(body.completed) && body.completed) {
+        body.completedAt = new Date().getTime();
+    } else {
+        body.completed = false;
+        body.completedAt = null;
+    };
+    todo.findByIdAndUpdate(id, { $set: body }, { new: true }).then((todoid) => {
+        if (!todoid) {
+            return res.status(404).send({
+                error: `todos ID ${id} not found`
             });
         };
         return res.status(200).send({ todoid });
